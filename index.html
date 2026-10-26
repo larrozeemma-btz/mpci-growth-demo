@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MPCI Brazil: Growth Automation System</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;color:#1a1a18;background:#f5f3ef;min-height:100vh;padding:2rem}
+:root{
+  --accent:#2D6A4F;--accent-light:#52B788;--accent-bg:#D8F3DC;
+  --warn:#E76F51;--warn-bg:#FDE8E1;
+  --amber:#F4A261;--amber-bg:#FEF3E2;
+  --blue:#2563EB;--blue-bg:#EFF6FF;
+  --muted:#6b6b65;--border:rgba(0,0,0,0.1);--border2:rgba(0,0,0,0.18);
+  --bg:#ffffff;--bg2:#f5f3ef;
+  --r:8px;--rl:12px;
+}
+.container{max-width:920px;margin:0 auto}
+
+.header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:0.5px solid var(--border)}
+.header-left .title{font-size:20px;font-weight:500;color:#1a1a18}
+.header-left .sub{font-size:13px;color:var(--muted);margin-top:3px}
+.tool-pills{display:flex;gap:6px;flex-wrap:wrap}
+.tool-pill{font-size:11px;padding:3px 10px;border-radius:20px;background:var(--bg);color:var(--muted);border:0.5px solid var(--border2)}
+
+.tabs{display:flex;gap:0;margin-bottom:1.75rem;border-bottom:0.5px solid var(--border)}
+.tab{font-size:13px;padding:.55rem 1.1rem .8rem;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;background:none;border-top:none;border-left:none;border-right:none;font-family:inherit}
+.tab:hover{color:#1a1a18}
+.tab.active{color:#1a1a18;border-bottom-color:var(--accent);font-weight:500}
+.pane{display:none}.pane.active{display:block}
+
+.kpi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:1.75rem}
+.kpi{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--r);padding:1rem 1.1rem}
+.kpi .lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.4rem}
+.kpi .val{font-size:22px;font-weight:500;color:#1a1a18}
+.kpi .sub{font-size:11px;margin-top:.3rem}
+.sub.up{color:var(--accent)}.sub.warn{color:var(--warn)}.sub.neutral{color:var(--muted)}
+
+.section-lbl{font-size:11px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.85rem}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1.75rem}
+.box{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--rl);padding:1.25rem}
+.box h3{font-size:11px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.9rem}
+
+.flow-step{display:flex;align-items:flex-start;gap:10px;margin-bottom:.55rem}
+.flow-icon{width:28px;height:28px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;margin-top:1px}
+.flow-text{font-size:13px;color:#1a1a18;font-weight:500}
+.flow-sub{font-size:11px;color:var(--muted);margin-top:1px}
+.arrow-down{width:1px;height:10px;background:var(--border);margin-left:13px;margin-bottom:3px}
+
+.board{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-bottom:1.25rem}
+.col{background:var(--bg2);border-radius:var(--r);padding:.75rem}
+.col-hd{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:.65rem;display:flex;justify-content:space-between;align-items:center}
+.col-hd .cnt{background:var(--bg);border-radius:20px;padding:1px 8px;font-size:10px;color:#1a1a18;border:0.5px solid var(--border)}
+.lead-card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--r);padding:.65rem .75rem;margin-bottom:6px;transition:border-color .15s;cursor:default}
+.lead-card:hover{border-color:var(--accent-light)}
+.lead-card .co{font-weight:500;font-size:12px;color:#1a1a18}
+.lead-card .role{font-size:11px;color:var(--muted);margin-top:1px}
+.lead-card .tag{font-size:10px;padding:1px 7px;border-radius:10px;margin-top:5px;display:inline-block}
+.tag-cpg{background:var(--blue-bg);color:var(--blue)}
+.tag-retail{background:var(--accent-bg);color:var(--accent)}
+.tag-dist{background:var(--amber-bg);color:#92400e}
+
+.seq-wrap{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--rl);padding:1.25rem;margin-bottom:1rem}
+.seq-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
+.seq-name{font-size:14px;font-weight:500;color:#1a1a18}
+.badge-status{font-size:11px;padding:2px 10px;border-radius:20px}
+.badge-active{background:var(--accent-bg);color:var(--accent)}
+.badge-paused{background:var(--warn-bg);color:var(--warn)}
+.step-row{display:flex;gap:10px;align-items:flex-start;margin-bottom:.7rem}
+.step-num{width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;font-size:11px;font-weight:500;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.step-body .step-title{font-size:12px;font-weight:500;color:#1a1a18}
+.step-body .step-desc{font-size:11px;color:var(--muted);margin-top:2px}
+.step-connector{width:1px;height:12px;background:var(--border);margin-left:10px;margin-bottom:3px}
+.metrics-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:.85rem;padding-top:.85rem;border-top:0.5px solid var(--border);text-align:center}
+.metric .mv{font-size:16px;font-weight:500;color:#1a1a18}
+.metric .ml{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-top:2px}
+
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:1.25rem}
+.cal-day{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--r);padding:.6rem;min-height:72px;font-size:11px}
+.cal-day .dn{font-weight:500;color:#1a1a18;margin-bottom:5px;font-size:12px}
+.cal-event{font-size:10px;padding:2px 6px;border-radius:4px;margin-bottom:3px}
+.ev-call{background:var(--accent-bg);color:var(--accent)}
+.ev-fu{background:var(--amber-bg);color:#92400e}
+.ev-demo{background:var(--blue-bg);color:var(--blue)}
+
+.report-section{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--rl);padding:1.25rem;margin-bottom:1rem}
+.rs-title{font-size:13px;font-weight:500;margin-bottom:.85rem;display:flex;align-items:center;gap:7px;color:#1a1a18}
+.rs-title .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:.55rem}
+.bar-lbl{font-size:12px;color:#1a1a18;min-width:115px}
+.bar-track{flex:1;height:8px;background:var(--bg2);border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;background:var(--accent);transition:width .7s ease}
+.bar-val{font-size:12px;font-weight:500;color:#1a1a18;min-width:36px;text-align:right}
+
+.btn{font-size:13px;font-weight:500;padding:.5rem 1.1rem;border-radius:var(--r);border:0.5px solid var(--border2);background:var(--bg);color:#1a1a18;cursor:pointer;transition:all .15s;font-family:inherit;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{background:var(--bg2)}
+.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn.primary:hover{opacity:.9}
+.btn-row{display:flex;gap:8px;margin-bottom:.75rem;flex-wrap:wrap}
+
+.log-box{background:var(--bg2);border-radius:var(--r);padding:.85rem;font-size:11px;font-family:'Courier New',monospace;color:var(--muted);min-height:52px;max-height:160px;overflow-y:auto;margin-top:.85rem;line-height:1.85;display:none;border:0.5px solid var(--border)}
+.log-box.show{display:block}
+.log-entry{display:flex;gap:10px}
+.log-ts{color:#9ca3a0;min-width:68px}
+.log-ok{color:var(--accent)}
+.log-info{color:var(--muted)}
+.log-warn{color:var(--warn)}
+
+select{font-size:13px;padding:.4rem .6rem;border:0.5px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:#1a1a18;font-family:inherit;outline:none;width:100%;margin-bottom:.75rem}
+select:focus{border-color:var(--accent)}
+
+.footer{margin-top:2.5rem;padding-top:1rem;border-top:0.5px solid var(--border);font-size:11px;color:var(--muted);display:flex;justify-content:space-between}
+
+@media(max-width:640px){
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  .two-col{grid-template-columns:1fr}
+  .board{grid-template-columns:repeat(2,1fr)}
+  .cal-grid{grid-template-columns:repeat(4,1fr)}
+  body{padding:1rem}
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="header-left">
+      <div class="title">Growth automation system</div>
+      <div class="sub">MPCI Brazil · International prospection pipeline · Built by Emma Larroze</div>
+      <div class="sub" style="font-style:italic">Illustrative data: company names and figures are fictional and do not reflect MPCI prospects or results.</div>
+    </div>
+    <div class="tool-pills">
+      <span class="tool-pill">Instantly</span>
+      <span class="tool-pill">Calendly</span>
+      <span class="tool-pill">Notion CRM</span>
+      <span class="tool-pill">Make / Zapier</span>
+      <span class="tool-pill">LinkedIn Sales Nav</span>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('overview')">Overview</button>
+    <button class="tab" onclick="switchTab('pipeline')">Pipeline</button>
+    <button class="tab" onclick="switchTab('sequences')">Sequences</button>
+    <button class="tab" onclick="switchTab('calendar')">Calendar & follow-ups</button>
+    <button class="tab" onclick="switchTab('report')">Monthly report</button>
+  </div>
+
+  <!-- OVERVIEW -->
+  <div class="pane active" id="pane-overview">
+    <div class="kpi-grid">
+      <div class="kpi"><div class="lbl">Leads generated</div><div class="val">280</div><div class="sub up">+18% vs M-1</div></div>
+      <div class="kpi"><div class="lbl">Reply rate</div><div class="val">16.1%</div><div class="sub up">Instantly seqs</div></div>
+      <div class="kpi"><div class="lbl">Calls booked</div><div class="val">32</div><div class="sub up">via Calendly</div></div>
+      <div class="kpi"><div class="lbl">Qualified opps</div><div class="val">9</div><div class="sub neutral">retail + CPG</div></div>
+    </div>
+
+    <div class="section-lbl">System architecture</div>
+    <div class="two-col">
+      <div class="box">
+        <h3>Lead capture → CRM</h3>
+        <div class="flow-step"><div class="flow-icon" style="background:var(--blue-bg)">🔍</div><div><div class="flow-text">LinkedIn Sales Navigator</div><div class="flow-sub">Retail, CPG, Distribution: targeted scraping</div></div></div>
+        <div class="arrow-down"></div>
+        <div class="flow-step"><div class="flow-icon" style="background:var(--amber-bg)">✉️</div><div><div class="flow-text">Email finding + enrichment</div><div class="flow-sub">Hunter / Apollo: deliverability verified</div></div></div>
+        <div class="arrow-down"></div>
+        <div class="flow-step"><div class="flow-icon" style="background:var(--accent-bg)">🗂️</div><div><div class="flow-text">Notion CRM centralization</div><div class="flow-sub">Company · role · market · deal status</div></div></div>
+        <div class="arrow-down"></div>
+        <div class="flow-step"><div class="flow-icon" style="background:var(--accent-bg)">⚡</div><div><div class="flow-text">Make automation</div><div class="flow-sub">Calendly booking → CRM status auto-update</div></div></div>
+      </div>
+      <div class="box">
+        <h3>Outreach → follow-up</h3>
+        <div class="flow-step"><div class="flow-icon" style="background:var(--blue-bg)">📤</div><div><div class="flow-text">Instantly sequences</div><div class="flow-sub">3 emails · segmented by industry + region</div></div></div>
+        <div class="arrow-down"></div>
+        <div class="flow-step"><div class="flow-icon" style="background:var(--amber-bg)">💬</div><div><div class="flow-text">Reply detected → sequence paused</div><div class="flow-sub">Instantly auto-stops if reply received</div></div></div>
+        <div class="arrow-down"></div>
+        <div class="flow-step"><div class="flow-icon" style="background:var(--accent-bg)">📅</div><div><div class="flow-text">Calendly link → call booked</div><div class="flow-sub">Email 3 embeds direct Calendly link</div></div></div>
+        <div class="arrow-down"></div>
+        <div class="flow-step"><div class="flow-icon" style="background:var(--accent-bg)">🔄</div><div><div class="flow-text">Follow-up pipeline sync</div><div class="flow-sub">Zapier/Make · no duplicates · auto status</div></div></div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn primary" onclick="runFullSim()">Simulate new lead incoming →</button>
+    </div>
+    <div class="log-box" id="log-overview"></div>
+  </div>
+
+  <!-- PIPELINE -->
+  <div class="pane" id="pane-pipeline">
+    <div class="section-lbl" style="margin-bottom:1rem">CRM pipeline · 5 stages</div>
+    <div class="board">
+      <div class="col">
+        <div class="col-hd">Identified <span class="cnt">10</span></div>
+        <div class="lead-card"><div class="co">Mercado Aurora</div><div class="role">Dir. Category Mgmt</div><div class="tag tag-retail">Retail</div></div>
+        <div class="lead-card"><div class="co">Lojas Serra Azul</div><div class="role">Business Dev Manager</div><div class="tag tag-retail">Retail</div></div>
+        <div class="lead-card"><div class="co">Distribuidora Vale Norte</div><div class="role">Sales Director</div><div class="tag tag-dist">Distribution</div></div>
+      </div>
+      <div class="col">
+        <div class="col-hd">Contacted <span class="cnt">14</span></div>
+        <div class="lead-card"><div class="co">Flora Viva Cosméticos</div><div class="role">Intl BD Director</div><div class="tag tag-cpg">CPG</div></div>
+        <div class="lead-card"><div class="co">Farmácias Ponto Verde</div><div class="role">Category Manager</div><div class="tag tag-retail">Retail</div></div>
+        <div class="lead-card"><div class="co">Rede Farma Sul</div><div class="role">Expansion Director</div><div class="tag tag-dist">Distribution</div></div>
+      </div>
+      <div class="col">
+        <div class="col-hd">Replied <span class="cnt">7</span></div>
+        <div class="lead-card" style="border-left:3px solid var(--accent-light)"><div class="co">Casa Ipê Varejo</div><div class="role">Sales VP</div><div class="tag tag-retail">Retail</div></div>
+        <div class="lead-card" style="border-left:3px solid var(--accent-light)"><div class="co">Sandálias Maré</div><div class="role">Intl Category Mgr</div><div class="tag tag-cpg">CPG</div></div>
+      </div>
+      <div class="col">
+        <div class="col-hd">Call booked <span class="cnt">5</span></div>
+        <div class="lead-card" style="border-left:3px solid var(--amber)"><div class="co">Doce Bairro Alimentos</div><div class="role">BD Director</div><div class="tag tag-cpg">CPG</div></div>
+        <div class="lead-card" style="border-left:3px solid var(--amber)"><div class="co">Essência Nativa</div><div class="role">Intl Expansion VP</div><div class="tag tag-cpg">CPG</div></div>
+      </div>
+      <div class="col">
+        <div class="col-hd">Qualified <span class="cnt">3</span></div>
+        <div class="lead-card" style="border-left:3px solid var(--accent)"><div class="co">Shoppings Horizonte</div><div class="role">Retail Dev Dir</div><div class="tag tag-retail">Retail</div></div>
+        <div class="lead-card" style="border-left:3px solid var(--accent)"><div class="co">Lar Limpo Brasil</div><div class="role">Sales Director</div><div class="tag tag-cpg">CPG</div></div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn primary" onclick="addLead()">+ Simulate incoming lead</button>
+      <button class="btn" onclick="progressLead()">Advance top lead →</button>
+    </div>
+    <div class="log-box" id="log-pipeline"></div>
+  </div>
+
+  <!-- SEQUENCES -->
+  <div class="pane" id="pane-sequences">
+    <div class="seq-wrap">
+      <div class="seq-hd"><div class="seq-name">CPG: International expansion</div><span class="badge-status badge-active">Active · 52 contacts</span></div>
+      <div class="step-row"><div class="step-num">1</div><div class="step-body"><div class="step-title">Day 0: Intro + market insight</div><div class="step-desc">Quick intro + insight specific to their category / target market</div></div></div>
+      <div class="step-connector"></div>
+      <div class="step-row"><div class="step-num">2</div><div class="step-body"><div class="step-title">Day 4: Follow-up + data point</div><div class="step-desc">Concrete international distribution example + competitor benchmark</div></div></div>
+      <div class="step-connector"></div>
+      <div class="step-row"><div class="step-num">3</div><div class="step-body"><div class="step-title">Day 9: Calendly invite</div><div class="step-desc">Invitation for a 20-min call + direct Calendly link</div></div></div>
+      <div class="metrics-row">
+        <div class="metric"><div class="mv">54.0%</div><div class="ml">Open rate</div></div>
+        <div class="metric"><div class="mv">17.5%</div><div class="ml">Reply rate</div></div>
+        <div class="metric"><div class="mv">8 calls</div><div class="ml">Booked</div></div>
+      </div>
+    </div>
+    <div class="seq-wrap">
+      <div class="seq-hd"><div class="seq-name">Retail BR: Category management</div><span class="badge-status badge-active">Active · 58 contacts</span></div>
+      <div class="step-row"><div class="step-num">1</div><div class="step-body"><div class="step-title">Day 0: Market opportunity</div><div class="step-desc">Retail trend analysis + premium distribution angle</div></div></div>
+      <div class="step-connector"></div>
+      <div class="step-row"><div class="step-num">2</div><div class="step-body"><div class="step-title">Day 5: Case study</div><div class="step-desc">Concrete example from a similar brand + quantified results</div></div></div>
+      <div class="step-connector"></div>
+      <div class="step-row"><div class="step-num">3</div><div class="step-body"><div class="step-title">Day 11: Last touch</div><div class="step-desc">Direct question about their expansion roadmap + Calendly link</div></div></div>
+      <div class="metrics-row">
+        <div class="metric"><div class="mv">57.3%</div><div class="ml">Open rate</div></div>
+        <div class="metric"><div class="mv">15.9%</div><div class="ml">Reply rate</div></div>
+        <div class="metric"><div class="mv">10 calls</div><div class="ml">Booked</div></div>
+      </div>
+    </div>
+    <div class="seq-wrap">
+      <div class="seq-hd"><div class="seq-name">Distribution: New markets</div><span class="badge-status badge-paused">Paused · 34 contacts</span></div>
+      <div class="step-row"><div class="step-num">1</div><div class="step-body"><div class="step-title">Day 0: Logistics pain point</div><div class="step-desc">Market entry challenges + distribution solutions angle</div></div></div>
+      <div class="step-connector"></div>
+      <div class="step-row"><div class="step-num">2</div><div class="step-body"><div class="step-title">Day 6: Benchmark</div><div class="step-desc">Comparative distributor data by region</div></div></div>
+      <div class="metrics-row">
+        <div class="metric"><div class="mv">49.6%</div><div class="ml">Open rate</div></div>
+        <div class="metric"><div class="mv">12.8%</div><div class="ml">Reply rate</div></div>
+        <div class="metric"><div class="mv">4 calls</div><div class="ml">Booked</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CALENDAR -->
+  <div class="pane" id="pane-calendar">
+    <div class="section-lbl">Week of March 16–22, 2026: Calendly sync + follow-ups</div>
+    <div class="cal-grid">
+      <div class="cal-day"><div class="dn">Mon 16</div><div class="cal-event ev-call">Call · Doce Bairro</div><div class="cal-event ev-fu">FU · Flora Viva</div></div>
+      <div class="cal-day"><div class="dn">Tue 17</div><div class="cal-event ev-demo">Demo · Horizonte</div><div class="cal-event ev-fu">FU · Serra Azul</div></div>
+      <div class="cal-day"><div class="dn">Wed 18</div><div class="cal-event ev-call">Call · Essência</div></div>
+      <div class="cal-day"><div class="dn">Thu 19</div><div class="cal-event ev-fu">FU · Vale Norte</div><div class="cal-event ev-fu">FU · Farma Sul</div></div>
+      <div class="cal-day"><div class="dn">Fri 20</div><div class="cal-event ev-call">Call · Lar Limpo</div><div class="cal-event ev-demo">Demo · Casa Ipê</div></div>
+      <div class="cal-day"><div class="dn">Sat 21</div></div>
+      <div class="cal-day"><div class="dn">Sun 22</div></div>
+    </div>
+    <div class="two-col">
+      <div class="box">
+        <h3>Automation rules</h3>
+        <div class="flow-step"><div class="flow-icon" style="background:var(--accent-bg)">📅</div><div><div class="flow-text">Calendly booking received</div><div class="flow-sub">→ CRM status updated to "Call booked"</div></div></div>
+        <div class="arrow-down"></div>
+        <div class="flow-step"><div class="flow-icon" style="background:var(--blue-bg)">⏸️</div><div><div class="flow-text">Instantly sequence paused</div><div class="flow-sub">→ No auto follow-up if call is scheduled</div></div></div>
+        <div class="arrow-down"></div>
+        <div class="flow-step"><div class="flow-icon" style="background:var(--amber-bg)">🔔</div><div><div class="flow-text">D-1 reminder + D+1 follow-up</div><div class="flow-sub">→ Auto notification + post-call follow-up queued</div></div></div>
+        <div class="arrow-down"></div>
+        <div class="flow-step"><div class="flow-icon" style="background:var(--accent-bg)">✅</div><div><div class="flow-text">Post-call → auto qualification</div><div class="flow-sub">→ Status updated, next action assigned</div></div></div>
+      </div>
+      <div class="box">
+        <h3>Simulate a Calendly booking</h3>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:.85rem">A prospect books a call: all automations trigger in sequence</div>
+        <select id="cal-prospect">
+          <option>Hiper Cidade · Category Dir</option>
+          <option>Lojas Ponte Nova · BD Manager</option>
+          <option>Laticínios Campo Bom · Sales Director</option>
+        </select>
+        <button class="btn primary" onclick="simBooking()">Simulate booking →</button>
+        <div class="log-box" id="log-cal"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REPORT -->
+  <div class="pane" id="pane-report">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem">
+      <div><div style="font-size:15px;font-weight:500;color:#1a1a18">Monthly report: March 2026</div><div style="font-size:12px;color:var(--muted);margin-top:3px">Auto-generated from Instantly + CRM data</div></div>
+      <button class="btn primary" onclick="genReport()">Regenerate report →</button>
+    </div>
+    <div class="report-section">
+      <div class="rs-title"><div class="dot" style="background:var(--accent)"></div>Pipeline activity</div>
+      <div class="bar-row"><div class="bar-lbl">New leads</div><div class="bar-track"><div class="bar-fill" style="width:80%"></div></div><div class="bar-val">280</div></div>
+      <div class="bar-row"><div class="bar-lbl">Replies</div><div class="bar-track"><div class="bar-fill" style="width:40%"></div></div><div class="bar-val">45</div></div>
+      <div class="bar-row"><div class="bar-lbl">Calls booked</div><div class="bar-track"><div class="bar-fill" style="width:25%"></div></div><div class="bar-val">32</div></div>
+      <div class="bar-row"><div class="bar-lbl">Qualified opps</div><div class="bar-track"><div class="bar-fill" style="width:10%"></div></div><div class="bar-val">9</div></div>
+    </div>
+    <div class="two-col">
+      <div class="report-section" style="margin:0">
+        <div class="rs-title"><div class="dot" style="background:var(--blue)"></div>Reply rate by segment</div>
+        <div class="bar-row"><div class="bar-lbl">CPG Intl</div><div class="bar-track"><div class="bar-fill" style="width:92%"></div></div><div class="bar-val">17.5%</div></div>
+        <div class="bar-row"><div class="bar-lbl">Retail BR</div><div class="bar-track"><div class="bar-fill" style="width:84%"></div></div><div class="bar-val">15.9%</div></div>
+        <div class="bar-row"><div class="bar-lbl">Distribution</div><div class="bar-track"><div class="bar-fill" style="width:67%"></div></div><div class="bar-val">12.8%</div></div>
+      </div>
+      <div class="report-section" style="margin:0">
+        <div class="rs-title"><div class="dot" style="background:var(--amber)"></div>Most active markets</div>
+        <div class="bar-row"><div class="bar-lbl">São Paulo</div><div class="bar-track"><div class="bar-fill" style="width:90%"></div></div><div class="bar-val">44%</div></div>
+        <div class="bar-row"><div class="bar-lbl">Rio de Janeiro</div><div class="bar-track"><div class="bar-fill" style="width:63%"></div></div><div class="bar-val">31%</div></div>
+        <div class="bar-row"><div class="bar-lbl">Other BR</div><div class="bar-track"><div class="bar-fill" style="width:51%"></div></div><div class="bar-val">25%</div></div>
+      </div>
+    </div>
+    <div class="report-section">
+      <div class="rs-title"><div class="dot" style="background:var(--accent-light)"></div>AI narrative summary</div>
+      <div style="font-size:13px;color:#1a1a18;line-height:1.85">March confirms strong traction in the international CPG segment with a 17.5% reply rate, above industry benchmark. Sales Directors and Category Managers remain the most responsive contacts. The Retail BR sequence performs well on early emails (57.3% open rate) but call conversion still needs optimization. Recommendation: test a more Brazil-specific hook in Email 2. The 9 qualified opportunities represent an estimated pipeline of 2.4M BRL in potential annual value. Q2 priority: accelerate on Distribution accounts now entering the reply phase after a campaign pause.</div>
+    </div>
+    <div class="log-box" id="log-report"></div>
+  </div>
+
+  <div class="footer">
+    <span>MPCI Brazil · Growth Automation System</span>
+    <span>Built by Emma Larroze · 2026</span>
+  </div>
+
+</div>
+<script>
+function switchTab(id){
+  document.querySelectorAll('.tab').forEach((t,i)=>{
+    t.classList.toggle('active',['overview','pipeline','sequences','calendar','report'][i]===id)
+  });
+  document.querySelectorAll('.pane').forEach(p=>p.classList.remove('active'));
+  document.getElementById('pane-'+id).classList.add('active');
+}
+function ts(){return new Date().toLocaleTimeString('en-US',{hour12:false,hour:'2-digit',minute:'2-digit',second:'2-digit'})}
+function addLog(boxId,msg,cls='info'){
+  const b=document.getElementById(boxId);
+  b.classList.add('show');
+  const d=document.createElement('div');
+  d.className='log-entry';
+  d.innerHTML=`<span class="log-ts">${ts()}</span><span class="log-${cls}">${msg}</span>`;
+  b.appendChild(d);b.scrollTop=b.scrollHeight;
+}
+function runFullSim(){
+  const b='log-overview';
+  document.getElementById(b).innerHTML='';
+  addLog(b,'New lead detected: Hiper Cidade · Category Dir');
+  setTimeout(()=>addLog(b,'Email found via Hunter.io · verified deliverable'),500);
+  setTimeout(()=>addLog(b,'Contact added to Notion CRM · status: Identified'),1000);
+  setTimeout(()=>addLog(b,'Enrolled in sequence: Retail BR: Category management'),1600);
+  setTimeout(()=>addLog(b,'Email 1 scheduled: Day 0: Market opportunity','ok'),2200);
+  setTimeout(()=>addLog(b,'Automation active: reply detection ON · Calendly watch ON','ok'),2700);
+  setTimeout(()=>addLog(b,'Lead live in pipeline. Next action: D+5 follow-up.','ok'),3100);
+}
+function addLead(){
+  const b='log-pipeline';
+  addLog(b,'New lead: Malharia Atlântico · Intl Sales Dir · CPG');
+  setTimeout(()=>addLog(b,'CRM updated · status: Identified','ok'),600);
+  setTimeout(()=>addLog(b,'Sequence enrolled: CPG: International expansion','ok'),1100);
+}
+function progressLead(){
+  const b='log-pipeline';
+  addLog(b,'Doce Bairro Alimentos reply detected → sequence paused');
+  setTimeout(()=>addLog(b,'Status: Replied → Call booked','ok'),700);
+  setTimeout(()=>addLog(b,'Calendly link sent · slot reserved: Mar 20','ok'),1300);
+}
+function simBooking(){
+  const p=document.getElementById('cal-prospect').value;
+  const b='log-cal';
+  document.getElementById(b).innerHTML='';
+  addLog(b,`Calendly booking received · ${p}`);
+  setTimeout(()=>addLog(b,'CRM status updated → Call booked','ok'),500);
+  setTimeout(()=>addLog(b,'Instantly sequence paused: no further auto-emails','ok'),1000);
+  setTimeout(()=>addLog(b,'Calendar event created · reminder D-1 scheduled','ok'),1500);
+  setTimeout(()=>addLog(b,'Post-call follow-up template queued · D+1','ok'),2000);
+  setTimeout(()=>addLog(b,'Pipeline sync complete: no duplicates detected','ok'),2400);
+}
+function genReport(){
+  const b='log-report';
+  addLog(b,'Fetching Instantly campaign data...');
+  setTimeout(()=>addLog(b,'Pulling CRM pipeline from Notion API'),600);
+  setTimeout(()=>addLog(b,'Computing conversion rates by segment + region'),1200);
+  setTimeout(()=>addLog(b,'Generating AI narrative via Claude...'),1800);
+  setTimeout(()=>addLog(b,'Report generated · ready to export','ok'),2500);
+}
+</script>
+</body>
+</html>
